@@ -6,35 +6,49 @@ const { Client } = require("pg"); // imports the pg module
 const client = new Client("postgres://postgres:1234@localhost:1234/juicebox-dev");
 
 // const client = new Client({
-//     connectionString: "postgres://1234@localhost:5432/juicebox-dev"
-//   });
-  
-
-// const client = new Client({
 //     user: 'postgres',
 //     password: '1234',
 //     host: 'localhost',
 //     port: 5432,
 //     database: 'juicebox-dev'
 //   });
-  
-module.exports = {
-	client,
-};
 
+// module.exports = {
+// 	client,
+// };
 
 //-----------------------------------------------------------
-// async function getAllUsers() {
-//     const { rows } = await client.query(
-//       `SELECT id, username 
-//       FROM users;
-//     `);
-  
-//     return rows;
-//   }
-  
-//   // and export them
-//   module.exports = {
-//     client,
-//     getAllUsers,
-//   }
+async function getAllUsers() {
+	const { rows } = await client.query(
+		`SELECT id, username 
+    FROM users;
+  `
+	);
+
+	return rows;
+}
+
+async function createUser({ username, password }) {
+	try {
+		const { row } = await client.query(
+			`
+		INSERT INTO users(username, password)
+		VALUES ($1, $2)
+		ON CONFLICT (username) DO NOTHING
+		RETURNING *;
+		`,
+			[username, password]
+		);
+
+		return row;
+	} catch (error) {
+		throw error;
+	}
+}
+
+// and export them
+module.exports = {
+	client,
+	getAllUsers,
+	createUser,
+};
