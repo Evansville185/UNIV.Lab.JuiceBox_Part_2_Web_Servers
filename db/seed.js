@@ -108,3 +108,4 @@ rebuildDB()
 	.then(testDB)
 	.catch(console.error)
 	.finally(() => client.end());
+//start @ 6.2
