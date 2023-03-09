@@ -18,9 +18,27 @@ const client = new Client("postgres://postgres:1234@localhost:1234/juicebox-dev"
 // };
 
 //-----------------------------------------------------------
+async function createUser({ username, password, name, location }) {
+	try {
+		const { row } = await client.query(
+			`
+		INSERT INTO users(username, password, name, location)
+		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (username) DO NOTHING
+		RETURNING *;
+		`,
+			[username, password, name, location]
+		);
+
+		return row;
+	} catch (error) {
+		throw error;
+	}
+}
+
 async function getAllUsers() {
 	const { rows } = await client.query(
-		`SELECT id, username 
+		`SELECT id, username, name, location, active 
     FROM users;
   `
 	);
@@ -28,19 +46,39 @@ async function getAllUsers() {
 	return rows;
 }
 
-async function createUser({ username, password }) {
+async function updateUser(id, fields = {}) {
+	//build the sett sttring
+	const setString = Object.keys(fields)
+		.map((key, index) => `"${key}"=$${index + 1}`)
+		.join(", ");
+
+	//return early if this is called without fields
+	if (setString.length === 0) {
+		return;
+	}
+
 	try {
-		const { row } = await client.query(
+		const {
+			rows: [user],
+		} = await client.query(
 			`
-		INSERT INTO users(username, password)
-		VALUES ($1, $2)
-		ON CONFLICT (username) DO NOTHING
+		UPDATE users
+		SET ${setString}
+		WHERE id=${id}
 		RETURNING *;
 		`,
-			[username, password]
+		Object.values(fields)
 		);
 
-		return row;
+		return user;
+	} catch (error) {
+		throw error;
+	}
+}
+
+async function createPost({ authoId, title,	content }) {
+	try{
+
 	} catch (error) {
 		throw error;
 	}
@@ -51,5 +89,6 @@ module.exports = {
 	client,
 	getAllUsers,
 	createUser,
+	updateUser,
 };
-//start @ 6.2
+//start @ 6.2.3
