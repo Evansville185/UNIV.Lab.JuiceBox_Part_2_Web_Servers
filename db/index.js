@@ -1,10 +1,12 @@
 //We are going to put our seed.js file on live reload so that we can see what's happening as we make changes. For now we will rely on logging to see what's happening under the hood as we go.
+
 const { Client } = require("pg"); // imports the pg module
 //The pg module is a Node.js package for working with PostgreSQL databases. The Client object is a class provided by the pg module that you can use to create a client connection to a PostgreSQL database.
 
 //supply the db name and location of the database
 const client = new Client("postgres://postgres:1234@localhost:1234/juicebox-dev");
 
+//alternate method to setup client
 // const client = new Client({
 //     user: 'postgres',
 //     password: '1234',
@@ -12,10 +14,6 @@ const client = new Client("postgres://postgres:1234@localhost:1234/juicebox-dev"
 //     port: 5432,
 //     database: 'juicebox-dev'
 //   });
-
-// module.exports = {
-// 	client,
-// };
 
 //USER Methods---------------------------------------------------
 async function createUser({ username, password, name, location }) {
@@ -192,25 +190,6 @@ async function updatePost(postId, fields = {}) {
 		// and create post_tags as necessary
 		await addTagsToPost(postId, tagList);
 
-		// // return early if this is called without fields
-		// if (setString.length === 0) {
-		// 	return;
-		// }
-
-		// try {
-		// 	const {
-		// 		rows: [post],
-		// 	} = await client.query(
-		// 		`
-		// 	UPDATE posts
-		// 	SET ${setString}
-		// 	WHERE id=${id}
-		// 	RETURNING *;
-		//   `,
-		// 		Object.values(fields));
-
-		// return post;
-
 		return await getPostById(postId);
 	} catch (error) {
 		throw error;
@@ -269,9 +248,7 @@ async function createTags(tagList) {
 	try {
 		// insert the tags, doing nothing on conflict
 		// returning nothing, we'll query after
-		// const {
-		// 	rows: [tags],
-		// } =
+
 		await client.query(
 			`
 			INSERT INTO tags(name)
@@ -419,6 +396,3 @@ module.exports = {
 	addTagsToPost,
 	getPostsByTagName,
 };
-//start @ 6.2.3
-
-//

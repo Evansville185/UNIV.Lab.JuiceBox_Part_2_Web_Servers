@@ -1,27 +1,4 @@
 // grab our client with destructuring from the export in index.js
-// const { client } = require('./index');
-
-// async function testDB() {
-//   try {
-//     // connect the client to the database, finally
-//     client.connect();
-
-//     // queries are promises, so we can await them
-//     const result = await client.query(`SELECT * FROM users;`);
-
-//     // for now, logging is a fine way to see what's up
-//     console.log(result);
-//   } catch (error) {
-//     console.error(error);
-//   } finally {
-//     // it's important to close out the client connection
-//     client.end();
-//   }
-// }
-
-// testDB();
-
-//-------------------------------------------------
 const {
 	client,
 	createUser,
@@ -127,6 +104,7 @@ async function createInitialUsers() {
 	}
 }
 
+//createPost to handle creating tags instead of its own function to only add tags
 async function createInitialPosts() {
 	try {
 		const [albert, sandra, glamgal] = await getAllUsers();
@@ -158,32 +136,6 @@ async function createInitialPosts() {
 		throw error;
 	}
 }
-
-//This populates some post tags. But realistically we shouldn't need this step. Instead, should update
-//createPost to handle creating tags.
-// async function createInitialTags() {
-// 	try {
-// 		console.log("Starting to create tags...");
-
-// 		const [happy, sad, inspo, catman] = await createTags([
-// 			"#happy",
-// 			"#worst-day-ever",
-// 			"#youcandoanything",
-// 			"#catmandoeverything",
-// 		]);
-
-// 		const [postOne, postTwo, postThree] = await getAllPosts();
-
-// 		await addTagsToPost(postOne.id, [happy, inspo]);
-// 		await addTagsToPost(postTwo.id, [sad, inspo]);
-// 		await addTagsToPost(postThree.id, [happy, catman, inspo]);
-
-// 		console.log("Finished creating tags!");
-// 	} catch (error) {
-// 		console.log("Error creating tags!");
-// 		throw error;
-// 	}
-// }
 
 // then modify rebuildDB to call our new function(createInitialUsers)
 async function rebuildDB() {
@@ -252,4 +204,3 @@ rebuildDB()
 	.then(testDB)
 	.catch(console.error)
 	.finally(() => client.end());
-//start @ 6.2.3 right before THEN, CREATE THE METHODS
