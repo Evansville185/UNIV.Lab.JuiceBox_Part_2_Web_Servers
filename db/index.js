@@ -26,7 +26,7 @@ async function createUser({ username, password, name, location }) {
 			`
 		INSERT INTO users(username, password, name, location) 
 		VALUES($1, $2, $3, $4) 
-		ON CONFLICT (username) DO NOTHING 
+		ON CONFLICT (username) DO NOTHING
 		RETURNING *;
 	  `,
 			[username, password, name, location]
@@ -164,12 +164,81 @@ async function updatePost(id, fields = {}) {
 	}
 }
 
+//We also want the associated information (tags and author) on each post.
+//Same method using in getPostsByUser
 async function getAllPosts() {
 	try {
-		const { rows } = await client.query(`
-		SELECT *
+		const { rows: postIds } = await client.query(`
+		SELECT id
 		FROM posts;
 	  `);
+
+		const posts = await Promise.all(postIds.map((post) => getPostById(post.id)));
+
+		return posts;
+	} catch (error) {
+		throw error;
+	}
+}
+
+//When we get the posts for a specific user, we will want to include the author and tags for each post.
+//If we modify the original query just to return the post id, we can iterate over each post calling our
+//updated getPostById, which has all the information we want in it.
+async function getPostsByUser(userId) {
+	try {
+		const { rows: postIds } = await client.query(`
+		SELECT id 
+		FROM posts 
+		WHERE "authorId"=${userId};
+	  `);
+
+		const posts = await Promise.all(postIds.map((post) => getPostById(post.id)));
+
+		return posts;
+	} catch (error) {
+		throw error;
+	}
+}
+
+async function createTags(tagList) {
+	if (tagList.length === 0) {
+		return;
+	}
+
+	// need something like: ($1), ($2), ($3)
+	const insertValues = tagList.map((_, index) => `$${index + 1}`).join("), (");
+	// then we can use: (${ insertValues }) in our string template
+
+	// need something like: $1, $2, $3
+	const selectValues = tagList.map((_, index) => `$${index + 1}`).join(", ");
+	// then we can use (${ selectValues }) in our string template
+
+	try {
+		// insert the tags, doing nothing on conflict
+		// returning nothing, we'll query after
+		// const {
+		// 	rows: [tags],
+		// } =
+		await client.query(
+			`
+			INSERT INTO tags(name)
+			VALUES (${insertValues})
+			ON CONFLICT (name) DO NOTHING;
+		  `,
+			tagList
+		);
+
+		// select all tags where the name is in our taglist
+		// return the rows from the query
+		const { rows } = await client.query(
+			`
+		SELECT *
+		FROM tags
+		WHERE name
+		IN (${selectValues});
+		`,
+			tagList
+		);
 
 		return rows;
 	} catch (error) {
@@ -177,15 +246,86 @@ async function getAllPosts() {
 	}
 }
 
-async function getPostsByUser(userId) {
-	try {
-		const { rows } = await client.query(`
-		SELECT * 
-		FROM posts
-		WHERE "authorId"=${userId};
-	  `);
+//This function will usually follow createTags, since we will only create tags while we create posts,
+//and will need to create the elements in the join table after creating the tags.
 
-		return rows;
+//These will be useful when we modify getPosts to include the tags, as well as when get create getPostsWithTag in a bit.
+//Here the tagList needs to be the ones returned from createTags, since we need the id, not the name.
+async function createPostTag(postId, tagId) {
+	try {
+		await client.query(
+			`
+		INSERT INTO post_tags("postId", "tagId")
+		VALUES ($1, $2)
+		ON CONFLICT ("postId", "tagId") DO NOTHING;
+	  	`,
+			[postId, tagId]
+		);
+	} catch (error) {
+		throw error;
+	}
+}
+
+//We can now use this multiple times in addTagsToPost. The function createPostTag is async, so it returns a promise.
+//That means if we make an array of non-await calls, we can use them with Promise.all, and then await that:
+async function addTagsToPost(postId, tagList) {
+	try {
+		const createPostTagPromises = tagList.map((tag) => createPostTag(postId, tag.id));
+
+		await Promise.all(createPostTagPromises);
+
+		return await getPostById(postId);
+	} catch (error) {
+		throw error;
+	}
+}
+
+//We will want the post, and its tags, we can do that with two queries. First we need to get the post itself,
+//then get its tags using a JOIN statement. We should also grab the author info using a simple query.
+
+//Last we should add the tags and author to the post before returning it, as well as remove the authorId,
+//since it is encapsulated in the author property.
+
+async function getPostById(postId) {
+	try {
+		const {
+			rows: [post],
+		} = await client.query(
+			`
+      SELECT *
+      FROM posts
+      WHERE id=$1;
+    `,
+			[postId]
+		);
+
+		const { rows: tags } = await client.query(
+			`
+      SELECT tags.*
+      FROM tags
+      JOIN post_tags ON tags.id=post_tags."tagId"
+      WHERE post_tags."postId"=$1;
+    `,
+			[postId]
+		);
+
+		const {
+			rows: [author],
+		} = await client.query(
+			`
+      SELECT id, username, name, location
+      FROM users
+      WHERE id=$1;
+    `,
+			[post.authorId]
+		);
+
+		post.tags = tags;
+		post.author = author;
+
+		delete post.authorId;
+
+		return post;
 	} catch (error) {
 		throw error;
 	}
@@ -201,7 +341,11 @@ module.exports = {
 	createPost,
 	updatePost,
 	getAllPosts,
+	getPostById,
 	getPostsByUser,
+	createTags,
+	createPostTag,
+	addTagsToPost,
 };
 //start @ 6.2.3
 
