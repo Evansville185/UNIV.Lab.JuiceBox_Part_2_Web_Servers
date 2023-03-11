@@ -115,7 +115,13 @@ async function getUserById(userId) {
 }
 
 //POST Methods-------------------------------------------------
-async function createPost({ authorId, title, content }) {
+//added "tags" param to createPost
+async function createPost({
+	authorId,
+	title,
+	content,
+	tags = [], // this is new
+}) {
 	try {
 		const {
 			rows: [post],
@@ -128,37 +134,84 @@ async function createPost({ authorId, title, content }) {
 			[authorId, title, content]
 		);
 
-		return post;
+		const tagList = await createTags(tags);
+
+		return await addTagsToPost(post.id, tagList);
 	} catch (error) {
 		throw error;
 	}
 }
 
-async function updatePost(id, fields = {}) {
+//Need to separate updating the post and the tags by creating more queries
+//Tag list might have some new tags, but it also might be missing some of the tags that
+//used to be part of the post.
+async function updatePost(postId, fields = {}) {
+	// read off the tags & remove that field
+	const { tags } = fields; // might be undefined
+	delete fields.tags;
+
 	// build the set string
 	const setString = Object.keys(fields)
 		.map((key, index) => `"${key}"=$${index + 1}`)
 		.join(", ");
 
-	// return early if this is called without fields
-	if (setString.length === 0) {
-		return;
-	}
-
 	try {
-		const {
-			rows: [post],
-		} = await client.query(
+		// update any fields that need to be updated
+		if (setString.length > 0) {
+			await client.query(
+				`
+		  UPDATE posts
+		  SET ${setString}
+		  WHERE id=${postId}
+		  RETURNING *;
+		`,
+				Object.values(fields)
+			);
+		}
+
+		// return early if there's no tags to update
+		if (tags === undefined) {
+			return await getPostById(postId);
+		}
+
+		// make any new tags that need to be made
+		const tagList = await createTags(tags);
+		const tagListIdString = tagList.map((tag) => `${tag.id}`).join(", ");
+
+		// delete any post_tags from the database which aren't in that tagList
+		await client.query(
 			`
-		UPDATE posts
-		SET ${setString}
-		WHERE id=${id}
-		RETURNING *;
+		DELETE FROM post_tags
+		WHERE "tagId"
+		NOT IN (${tagListIdString})
+		AND "postId"=$1;
 	  `,
-			Object.values(fields)
+			[postId]
 		);
 
-		return post;
+		// and create post_tags as necessary
+		await addTagsToPost(postId, tagList);
+
+		// // return early if this is called without fields
+		// if (setString.length === 0) {
+		// 	return;
+		// }
+
+		// try {
+		// 	const {
+		// 		rows: [post],
+		// 	} = await client.query(
+		// 		`
+		// 	UPDATE posts
+		// 	SET ${setString}
+		// 	WHERE id=${id}
+		// 	RETURNING *;
+		//   `,
+		// 		Object.values(fields));
+
+		// return post;
+
+		return await getPostById(postId);
 	} catch (error) {
 		throw error;
 	}
@@ -285,7 +338,6 @@ async function addTagsToPost(postId, tagList) {
 
 //Last we should add the tags and author to the post before returning it, as well as remove the authorId,
 //since it is encapsulated in the author property.
-
 async function getPostById(postId) {
 	try {
 		const {
@@ -331,6 +383,25 @@ async function getPostById(postId) {
 	}
 }
 
+async function getPostsByTagName(tagName) {
+	try {
+		const { rows: postIds } = await client.query(
+			`
+		SELECT posts.id
+		FROM posts
+		JOIN post_tags ON posts.id=post_tags."postId"
+		JOIN tags ON tags.id=post_tags."tagId"
+		WHERE tags.name=$1;
+		`,
+			[tagName]
+		);
+
+		return await Promise.all(postIds.map((post) => getPostById(post.id)));
+	} catch (error) {
+		throw error;
+	}
+}
+
 // and export them
 module.exports = {
 	client,
@@ -346,6 +417,7 @@ module.exports = {
 	createTags,
 	createPostTag,
 	addTagsToPost,
+	getPostsByTagName,
 };
 //start @ 6.2.3
 

@@ -34,6 +34,7 @@ const {
 	getPostsByUser,
 	createTags,
 	addTagsToPost,
+	getPostsByTagName,
 } = require("./index");
 
 async function dropTables() {
@@ -135,19 +136,21 @@ async function createInitialPosts() {
 			authorId: albert.id,
 			title: "First Post",
 			content: "This is my first post. I hope I love writing blogs as much as I love writing them.",
+			tags: ["#happy", "#youcandoanything"],
 		});
 
 		await createPost({
 			authorId: sandra.id,
 			title: "Second Post",
-			content: "This is my second post. I do love writing blogs as much as I love writing them.",
+			content: "This is my second post. I don't love writing.",
+			tags: ["#happy", "#worst-day-ever"],
 		});
 
 		await createPost({
 			authorId: glamgal.id,
 			title: "Third Post",
-			content:
-				"This is my third post. I had a change of heart with writing blogs. I realized I don't love writing blogs as much.",
+			content: "This is my third post. Writing makes me happy.",
+			tags: ["#happy", "#youcandoanything", "#canmandoeverything"],
 		});
 		console.log("Finished creating posts!");
 	} catch (error) {
@@ -156,29 +159,31 @@ async function createInitialPosts() {
 	}
 }
 
-async function createInitialTags() {
-	try {
-		console.log("Starting to create tags...");
+//This populates some post tags. But realistically we shouldn't need this step. Instead, should update
+//createPost to handle creating tags.
+// async function createInitialTags() {
+// 	try {
+// 		console.log("Starting to create tags...");
 
-		const [happy, sad, inspo, catman] = await createTags([
-			"#happy",
-			"#worst-day-ever",
-			"#youcandoanything",
-			"#catmandoeverything",
-		]);
+// 		const [happy, sad, inspo, catman] = await createTags([
+// 			"#happy",
+// 			"#worst-day-ever",
+// 			"#youcandoanything",
+// 			"#catmandoeverything",
+// 		]);
 
-		const [postOne, postTwo, postThree] = await getAllPosts();
+// 		const [postOne, postTwo, postThree] = await getAllPosts();
 
-		await addTagsToPost(postOne.id, [happy, inspo]);
-		await addTagsToPost(postTwo.id, [sad, inspo]);
-		await addTagsToPost(postThree.id, [happy, catman, inspo]);
+// 		await addTagsToPost(postOne.id, [happy, inspo]);
+// 		await addTagsToPost(postTwo.id, [sad, inspo]);
+// 		await addTagsToPost(postThree.id, [happy, catman, inspo]);
 
-		console.log("Finished creating tags!");
-	} catch (error) {
-		console.log("Error creating tags!");
-		throw error;
-	}
-}
+// 		console.log("Finished creating tags!");
+// 	} catch (error) {
+// 		console.log("Error creating tags!");
+// 		throw error;
+// 	}
+// }
 
 // then modify rebuildDB to call our new function(createInitialUsers)
 async function rebuildDB() {
@@ -189,7 +194,7 @@ async function rebuildDB() {
 		await createTables();
 		await createInitialUsers();
 		await createInitialPosts();
-		await createInitialTags();
+		// await createInitialTags(); now creating tags through createPost
 	} catch (error) {
 		console.log("Error during rebuildDB");
 		throw error;
@@ -215,12 +220,15 @@ async function testDB() {
 		const posts = await getAllPosts();
 		console.log("Result:", posts);
 
-		console.log("Calling updatePost on posts[0]");
-		const updatePostResult = await updatePost(posts[0].id, {
-			title: "New Title",
-			content: "Updated Content",
+		console.log("Calling updatePost on posts[1], only updating tags");
+		const updatePostTagsResult = await updatePost(posts[1].id, {
+			tags: ["#youcandoanything", "#redfish", "#bluefish"],
 		});
-		console.log("Result:", updatePostResult);
+		console.log("Result:", updatePostTagsResult);
+
+		console.log("Calling getPostsByTagName with #happy");
+		const postsWithHappy = await getPostsByTagName("#happy");
+		console.log("Result:", postsWithHappy);
 
 		console.log("Calling getUserById with 1, 2, 3");
 		const albert = await getUserById(1);
