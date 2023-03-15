@@ -1,13 +1,15 @@
 //We are going to put our seed.js file on live reload so that we can see what's happening as we make changes. For now we will rely on logging to see what's happening under the hood as we go.
-
+require("dotenv").config("../.env");
 const { Client } = require("pg"); // imports the pg module
 //The pg module is a Node.js package for working with PostgreSQL databases. The Client object is a class provided by the pg module that you can use to create a client connection to a PostgreSQL database.
 
 //supply the db name and location of the database
-const client = new Client("postgres://postgres:1234@localhost:1234/juicebox-dev");
+
+const client = new Client(process.env.DATABASE_URL);
 
 //alternate method to setup client
-// const client = new Client({
+// METHOD 1: const client = new Client("postgres://postgres:1234@localhost:1234/juicebox-dev");
+// METHOD 2: const client = new Client({
 //     user: 'postgres',
 //     password: '1234',
 //     host: 'localhost',
