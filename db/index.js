@@ -215,6 +215,7 @@ async function getAllPosts() {
 	}
 }
 
+
 //When we get the posts for a specific user, we will want to include the author and tags for each post.
 //If we modify the original query just to return the post id, we can iterate over each post calling our
 //updated getPostById, which has all the information we want in it.
@@ -271,6 +272,19 @@ async function createTags(tagList) {
 		`,
 			tagList
 		);
+
+		return rows;
+	} catch (error) {
+		throw error;
+	}
+}
+
+async function getAllTags() {
+	try {
+		const { rows } = await client.query(`
+		SELECT *
+		FROM tags;
+		`);
 
 		return rows;
 	} catch (error) {
@@ -397,4 +411,5 @@ module.exports = {
 	createPostTag,
 	addTagsToPost,
 	getPostsByTagName,
+	getAllTags,
 };

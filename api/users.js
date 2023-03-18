@@ -10,11 +10,25 @@ const usersRouter = express.Router();
 usersRouter.use((req, res, next) => {
     console.log("A request is being made to /users");
 
-    res.send({message: 'hello from /usesrs!'});
+    // res.send({message: 'hello from /users!'});
+    next();
 });
 
+//-----------------------------------------------------------------------
+//destructure function from db/index.js
+//**in order to use function, need reference connection to 'client' in root index.js**
+const { getAllUsers } = require('../db');
 
+// That middleware will fire whenever a GET request is made to /api/users
+// It will send back a simple object, with an empty array.
+//when a request comes in, we first ask the database for the data we want, then send it back to the user.
+usersRouter.get('/', async (req, res) => {
+    const users = await getAllUsers();
 
+    res.send({
+        users
+    });
+});
 
 
 //exports usersRouter instance, so that it can be used by other modules.
