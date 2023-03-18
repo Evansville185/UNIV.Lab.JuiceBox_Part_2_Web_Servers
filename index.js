@@ -42,11 +42,12 @@ server.use("/api", (req, res, next) => {
 	next();
 });
 
-// However, if a POST request was made to /api, the app.get middleware would be skipped over, and the app.use would go off, log, and move on to the next match.
+//However, if a POST request was made to /api, the app.get middleware would be skipped over, and the app.use would go off, log, and move on to the next match.
 
-const apiRouter = require("./api");
-server.use("/api", apiRouter);
 
 server.listen(PORT, () => {
 	console.log("The server is up on port", PORT);
 });
+
+const apiRouter = require("./api");
+server.use("/api", apiRouter);
