@@ -1,21 +1,21 @@
 //refer to users.js for reference setup to apiRouter
-const express = require('express');
+const express = require("express");
 const postsRouter = express.Router();
 
 postsRouter.use((req, res, next) => {
-    console.log("A request is being made to /posts");
+	console.log("A request is being made to /posts");
 
-    next();
+	next();
 });
 
-const { getAllPosts } = require('../db');
+const { getAllPosts } = require("../db");
 
-postsRouter.get('/', async (req, res) => {
-    const posts = await getAllPosts();
-    
-    res.send({
-        posts
-    });
+postsRouter.get("/", async (req, res) => {
+	const posts = await getAllPosts();
+
+	res.send({
+		posts,
+	});
 });
 
 module.exports = postsRouter;

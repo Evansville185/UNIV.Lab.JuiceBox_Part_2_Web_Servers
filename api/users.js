@@ -1,40 +1,39 @@
-//The express object is useful for more than creating a server. Here we use the Router function to create a new router, 
+//The express object is useful for more than creating a server. Here we use the Router function to create a new router,
 //and then export it from the script.
-const express = require('express');
-//creates a new router instance by calling express.Router() and is assigned to the 
+const express = require("express");
+//creates a new router instance by calling express.Router() and is assigned to the
 // usersRouter constant.
 const usersRouter = express.Router();
 
-//middleware function logs a message to the console when a request is made to /users and sends a JSON 
+//middleware function logs a message to the console when a request is made to /users and sends a JSON
 //response containing a message property with the value 'hello from /usesrs!'.
 usersRouter.use((req, res, next) => {
-    console.log("A request is being made to /users");
+	console.log("A request is being made to /users");
 
-    // res.send({message: 'hello from /users!'});
-    next();
+	// res.send({message: 'hello from /users!'});
+	next();
 });
 
 //-----------------------------------------------------------------------
 //destructure function from db/index.js
 //**in order to use function, need reference connection to 'client' in root index.js**
-const { getAllUsers } = require('../db');
+const { getAllUsers } = require("../db");
 
 // That middleware will fire whenever a GET request is made to /api/users
 // It will send back a simple object, with an empty array.
 //when a request comes in, we first ask the database for the data we want, then send it back to the user.
-usersRouter.get('/', async (req, res) => {
-    const users = await getAllUsers();
+usersRouter.get("/", async (req, res) => {
+	const users = await getAllUsers();
 
-    res.send({
-        users
-    });
+	res.send({
+		users,
+	});
 });
 
-usersRouter.post('/login', async (req, res, next) =>{
-    console.log(req.body);
-    res.end();
+usersRouter.post("/login", async (req, res, next) => {
+	console.log(req.body);
+	res.end();
 });
-
 
 //exports usersRouter instance, so that it can be used by other modules.
 module.exports = usersRouter;
