@@ -30,6 +30,11 @@ usersRouter.get('/', async (req, res) => {
     });
 });
 
+usersRouter.post('/login', async (req, res, next) =>{
+    console.log(req.body);
+    res.end();
+});
+
 
 //exports usersRouter instance, so that it can be used by other modules.
 module.exports = usersRouter;

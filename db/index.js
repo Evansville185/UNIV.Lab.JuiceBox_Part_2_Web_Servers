@@ -215,7 +215,6 @@ async function getAllPosts() {
 	}
 }
 
-
 //When we get the posts for a specific user, we will want to include the author and tags for each post.
 //If we modify the original query just to return the post id, we can iterate over each post calling our
 //updated getPostById, which has all the information we want in it.

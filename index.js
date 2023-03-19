@@ -1,18 +1,19 @@
+require("dotenv").config("./.env");
 const PORT = 3000;
 const express = require("express");
 const server = express();
-const morgan = require('morgan');
-//connected 
-const { client } = require('./db');
+const morgan = require("morgan");
+//connected
+const { client } = require("./db");
 client.connect();
 
 // function which logs out the incoming requests: GET /api/users 304 19.825 ms - -
 //We get the method, the route, the HTTP response code (here, 304), and how long it took to form.
-server.use(morgan('dev'));
+server.use(morgan("dev"));
 
-// function will read incoming JSON from requests. The request's header has to be Content-Type: application/json, 
+// function will read incoming JSON from requests. The request's header has to be Content-Type: application/json,
 // but we get the benefit of being able to send objects easily to our server.
-server.use(express.json())
+server.use(express.json());
 
 //When attaching middleware, below can be specified:
 // The method: get, post, patch, put, and delete, or method agnostic (use)
@@ -55,7 +56,6 @@ server.use("/api", (req, res, next) => {
 });
 
 //However, if a POST request was made to /api, the app.get middleware would be skipped over, and the app.use would go off, log, and move on to the next match.
-
 
 server.listen(PORT, () => {
 	console.log("The server is up on port", PORT);
