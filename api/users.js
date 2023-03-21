@@ -12,13 +12,13 @@ usersRouter.use((req, res, next) => {
 	console.log("A request is being made to /users");
 
 	// res.send({ message: 'hello from /users!' });
-  next();
+	next();
 });
 
 //-----------------------------------------------------------------------
 //destructure function from db/index.js
 //**in order to use function, need reference connection to 'client' in root index.js**
-const { getAllUsers, getUsersByUsername } = require("../db");
+const { getAllUsers, getUserByUsername, createUser } = require("../db");
 
 // That middleware will fire whenever a GET request is made to /api/users
 // It will send back a simple object, with an empty array.
@@ -31,6 +31,7 @@ usersRouter.get("/", async (req, res) => {
 	});
 });
 
+//login users------------------------------------------------------------
 usersRouter.post("/login", async (req, res, next) => {
 	const { username, password } = req.body;
 
@@ -43,8 +44,7 @@ usersRouter.post("/login", async (req, res, next) => {
 	}
 
 	try {
-		const user = await getUsersByUsername(username);
-		console.log("stop1");
+		const user = await getUserByUsername(username);
 		if (user && user.password == password) {
 			// create token & return to user
 			const token = jwt.sign(
@@ -52,12 +52,10 @@ usersRouter.post("/login", async (req, res, next) => {
 				process.env.JWT_SECRET
 			);
 			token;
-			console.log("stop2");
 
 			const verifytoken = jwt.verify(token, process.env.JWT_SECRET);
 
 			verifytoken;
-			console.log("stop3");
 
 			res.send({ message: "you're logged in!", token });
 		} else {
@@ -70,6 +68,71 @@ usersRouter.post("/login", async (req, res, next) => {
 		console.log(error);
 		next(error);
 	}
+});
+
+//register new user-------------------------------------------------------
+usersRouter.post("/register", async (req, res, next) => {
+	const { username, password, name, location } = req.body;
+  
+  //practicing validations of body---------
+  if(!username || username == '') {
+    next({
+      name: "MissingUsernameError",
+      message: "Username not filled out"
+    })
+  } else if(!password || password == '' || password.length < 4) {
+    next({
+      name: "MissingPasswordError Or PasswordNeedsToBeLongerThan4Characters",
+      message: "Password not filled out or needs to be longer than 4 characters"
+    })
+  } else if(!name || name == '') {
+    next({
+      name: "MissingNameError",
+      message: "Name not filled out"
+    })
+  } else if(!location || location == '') {
+    next({
+      name: "MissingLocationError",
+      message: "Location not filled out"
+    })
+  } else {
+  //practicing validatios of body---------
+	try {
+		const _user = await getUserByUsername(username);
+
+		if (_user) {
+			next({
+				name: "UserExistsError",
+				message: "A user by that username already exists",
+			});
+		}
+
+		const user = await createUser({
+			username,
+			password,
+			name,
+			location,
+		});
+
+		const token = jwt.sign(
+			{
+				id: user.id,
+				username,
+			},
+			process.env.JWT_SECRET,
+			{
+				expiresIn: "1w",
+			}
+		);
+
+		res.send({
+			message: "thank you for signing up",
+			token,
+		});
+	} catch ({ name, message }) {
+		next({ name, message });
+	}
+}
 });
 
 //exports usersRouter instance, so that it can be used by other modules.

@@ -9,33 +9,36 @@ const { JWT_SECRET } = process.env;
 //jwt request setup-------------------------------------------------------------------------------
 // set `req.user` if possible
 apiRouter.use(async (req, res, next) => {
-	const prefix = "Bearer ";
-	const auth = req.header("Authorization");
-
-	if (!auth) {
-		// nothing to see here
-
-		next();
+	const prefix = 'Bearer ';
+	const auth = req.header('Authorization');
+  
+	if (!auth) { // nothing to see here
+	next();
+	//example if you want to throw an error not having auth header
+	// 	next({
+	// 		name: "AuthorizationHeaderError",
+	// 		message: `Authorization header is missing`,
+	//   });
 	} else if (auth.startsWith(prefix)) {
-		const token = auth.slice(prefix.length);
-
-		try {
-			const { id } = jwt.verify(token, JWT_SECRET);
-
-			if (id) {
-				req.user = await getUserById(id);
-				next();
-			}
-		} catch ({ name, message }) {
-			next({ name, message });
+	  const token = auth.slice(prefix.length);
+  
+	  try {
+		const { id } = jwt.verify(token, JWT_SECRET);
+		
+		if (id) {
+		  req.user = await getUserById(id);
+		  next();
 		}
+	  } catch ({ name, message }) {
+		next({ name, message });
+	  }
 	} else {
 		next({
 			name: "AuthorizationHeaderError",
 			message: `Authorization token must start with ${prefix}`,
-		});
+	  });
 	}
-});
+  });
 // You can see by the if/else if/else we have three possibilities with every request to /api:
 
 // 1.IF: The Authorization header wasn't set. This might happen with registration or login, or when the browser doesn't have a saved token. Regardless of why, there is no way we can set a user if their data isn't passed to us.
@@ -74,7 +77,7 @@ apiRouter.use("/tags", tagsRouter);
 apiRouter.use((error, req, res, next) => {
 	res.send({
 		name: error.name,
-		message: error.message,
+		message: error.message
 	});
 });
 

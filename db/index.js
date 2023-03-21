@@ -114,7 +114,7 @@ async function getUserById(userId) {
 	}
 }
 
-async function getUsersByUsername(username) {
+async function getUserByUsername(username) {
 	try {
 		const {
 			rows: [user],
@@ -430,5 +430,5 @@ module.exports = {
 	addTagsToPost,
 	getPostsByTagName,
 	getAllTags,
-	getUsersByUsername,
+	getUserByUsername,
 };
