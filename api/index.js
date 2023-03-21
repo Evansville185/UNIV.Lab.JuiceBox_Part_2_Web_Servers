@@ -14,6 +14,7 @@ apiRouter.use(async (req, res, next) => {
 
 	if (!auth) {
 		// nothing to see here
+
 		next();
 	} else if (auth.startsWith(prefix)) {
 		const token = auth.slice(prefix.length);
@@ -41,6 +42,14 @@ apiRouter.use(async (req, res, next) => {
 // 2.ELSE IF: It was set, and begins with 'Bearer' followed by a space. If so, we'll read the token and try to decrypt it. a. On successful 'verify', try to read the user from the database b. A failed 'verify' throws an error, which we catch in the catch block. We read the 'name' and 'message' on the error and pass it to 'next()'.
 // 3.ELSE: A user set the header, but it wasn't formed correctly. We send a 'name' and 'message' to 'next()'
 // in one case we might add a key to the 'req' object, and in two of the cases we might pass an error object to 'next'.
+
+apiRouter.use((req, res, next) => {
+	if (req.user) {
+		console.log("User is set:", req.user);
+	}
+
+	next();
+});
 
 //component routes------------------------------------------------------------------------------
 // creates a new router instance by calling express.Router(). and assigned to apiRouter constant.

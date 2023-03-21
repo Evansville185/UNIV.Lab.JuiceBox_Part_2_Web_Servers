@@ -4,20 +4,21 @@ const express = require("express");
 //creates a new router instance by calling express.Router() and is assigned to the
 // usersRouter constant.
 const usersRouter = express.Router();
+const jwt = require("jsonwebtoken");
 
 //middleware function logs a message to the console when a request is made to /users and sends a JSON
 //response containing a message property with the value 'hello from /usesrs!'.
 usersRouter.use((req, res, next) => {
 	console.log("A request is being made to /users");
 
-	// res.send({message: 'hello from /users!'});
-	next();
+	// res.send({ message: 'hello from /users!' });
+  next();
 });
 
 //-----------------------------------------------------------------------
 //destructure function from db/index.js
 //**in order to use function, need reference connection to 'client' in root index.js**
-const { getAllUsers } = require("../db");
+const { getAllUsers, getUsersByUsername } = require("../db");
 
 // That middleware will fire whenever a GET request is made to /api/users
 // It will send back a simple object, with an empty array.
@@ -31,8 +32,44 @@ usersRouter.get("/", async (req, res) => {
 });
 
 usersRouter.post("/login", async (req, res, next) => {
-	console.log(req.body);
-	res.end();
+	const { username, password } = req.body;
+
+	// request must have both
+	if (!username || !password) {
+		next({
+			name: "MissingCredentialsError",
+			message: "Please supply both a username and password",
+		});
+	}
+
+	try {
+		const user = await getUsersByUsername(username);
+		console.log("stop1");
+		if (user && user.password == password) {
+			// create token & return to user
+			const token = jwt.sign(
+				{ id: user.id, username: user.username, password: user.password },
+				process.env.JWT_SECRET
+			);
+			token;
+			console.log("stop2");
+
+			const verifytoken = jwt.verify(token, process.env.JWT_SECRET);
+
+			verifytoken;
+			console.log("stop3");
+
+			res.send({ message: "you're logged in!", token });
+		} else {
+			next({
+				name: "IncorrectCredentialsError",
+				message: "Username or password is incorrect",
+			});
+		}
+	} catch (error) {
+		console.log(error);
+		next(error);
+	}
 });
 
 //exports usersRouter instance, so that it can be used by other modules.

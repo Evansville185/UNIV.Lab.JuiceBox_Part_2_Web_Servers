@@ -114,6 +114,25 @@ async function getUserById(userId) {
 	}
 }
 
+async function getUsersByUsername(username) {
+	try {
+		const {
+			rows: [user],
+		} = await client.query(
+			`
+		SELECT *
+		FROM users
+		WHERE username=$1;
+		`,
+			[username]
+		);
+
+		return user;
+	} catch (error) {
+		throw error;
+	}
+}
+
 //POST Methods-------------------------------------------------
 //added "tags" param to createPost
 async function createPost({
@@ -411,4 +430,5 @@ module.exports = {
 	addTagsToPost,
 	getPostsByTagName,
 	getAllTags,
+	getUsersByUsername,
 };

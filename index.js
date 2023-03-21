@@ -51,7 +51,7 @@ server.get("/api", (req, res, next) => {
 });
 
 server.use("/api", (req, res, next) => {
-	console.log("3A request was made to /api");
+	console.log("2A request was made to /api");
 	next();
 });
 
