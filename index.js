@@ -12,10 +12,6 @@ const { client } = require("./db");
 client.connect();
 
 
-// const bodyParser = require('body-parser');
-// server.use(bodyParser.json());
-
-
 // function will read incoming JSON from requests. The request's header has to be Content-Type: application/json,
 // but we get the benefit of being able to send objects easily to our server.
 server.use(express.json());

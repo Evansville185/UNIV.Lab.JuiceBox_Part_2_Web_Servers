@@ -1,7 +1,7 @@
 const express = require("express");
+// Before we start attaching our routers, need to add router to api
 const apiRouter = express.Router();
 
-// Before we start attaching our routers
 const jwt = require("jsonwebtoken");
 const { getUserById } = require("../db");
 const { JWT_SECRET } = process.env;

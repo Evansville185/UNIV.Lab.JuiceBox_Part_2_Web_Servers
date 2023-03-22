@@ -5,6 +5,9 @@ const express = require("express");
 // usersRouter constant.
 const usersRouter = express.Router();
 const jwt = require("jsonwebtoken");
+//destructure function from db/index.js
+//**in order to use function, need reference connection to 'client' in root index.js**
+const { getAllUsers, getUserByUsername, createUser } = require("../db");
 
 //middleware function logs a message to the console when a request is made to /users and sends a JSON
 //response containing a message property with the value 'hello from /usesrs!'.
@@ -15,10 +18,6 @@ usersRouter.use((req, res, next) => {
 	next();
 });
 
-//-----------------------------------------------------------------------
-//destructure function from db/index.js
-//**in order to use function, need reference connection to 'client' in root index.js**
-const { getAllUsers, getUserByUsername, createUser } = require("../db");
 
 // That middleware will fire whenever a GET request is made to /api/users
 // It will send back a simple object, with an empty array.
@@ -102,7 +101,7 @@ usersRouter.post("/register", async (req, res, next) => {
 		});
 	} else {
 		//practicing validatios for body---------
-		
+
 		try {
 			const _user = await getUserByUsername(username);
 
