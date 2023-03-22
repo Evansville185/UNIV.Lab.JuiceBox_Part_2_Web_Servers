@@ -362,6 +362,15 @@ async function getPostById(postId) {
 			[postId]
 		);
 
+		// This is NEW
+		if (!post) {
+			throw {
+				name: "PostNotFoundeError",
+				message: "Could not find a post with that postId",
+			};
+		}
+		//Newness ends here
+
 		const { rows: tags } = await client.query(
 			`
       SELECT tags.*
@@ -420,6 +429,7 @@ module.exports = {
 	updateUser,
 	getAllUsers,
 	getUserById,
+	getUserByUsername,
 	createPost,
 	updatePost,
 	getAllPosts,
@@ -430,5 +440,4 @@ module.exports = {
 	addTagsToPost,
 	getPostsByTagName,
 	getAllTags,
-	getUserByUsername,
 };

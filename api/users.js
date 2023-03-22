@@ -74,7 +74,7 @@ usersRouter.post("/login", async (req, res, next) => {
 usersRouter.post("/register", async (req, res, next) => {
 	const { username, password, name, location } = req.body;
 
-	//practicing validations of body---------
+	//practicing validations for body---------
 	if (!username) {
 		next({
 			name: "MissingUsernameError",
@@ -101,7 +101,8 @@ usersRouter.post("/register", async (req, res, next) => {
 			message: "Location not filled out",
 		});
 	} else {
-		//practicing validatios of body---------
+		//practicing validatios for body---------
+		
 		try {
 			const _user = await getUserByUsername(username);
 
