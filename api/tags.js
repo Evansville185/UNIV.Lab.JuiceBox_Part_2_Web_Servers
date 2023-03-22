@@ -22,7 +22,7 @@ tagsRouter.get("/:tagName/posts", async (req, res, next) => {
 	console.log("what im sending", req.params.tagName);
 	// read the tagname from the params
 	const { tagName } = req.params;
-	// tagName = encodeURIComponent(tagName);
+    
 	try {
 		// use our method to get posts by tag name from the db
 		const allPosts = await getPostsByTagName(decodeURIComponent(tagName));
