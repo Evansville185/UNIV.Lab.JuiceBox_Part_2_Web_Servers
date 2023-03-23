@@ -45,7 +45,7 @@ postsRouter.post("/", requireUser, async (req, res, next) => {
 });
 
 //getallposts-------------------------------------------------
-postsRouter.get("/", async (req, res) => {
+postsRouter.get("/", async (req, res, next) => {
 	try {
 		const allPosts = await getAllPosts();
 
