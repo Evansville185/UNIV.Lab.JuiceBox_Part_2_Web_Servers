@@ -1,4 +1,3 @@
-// grab our client with destructuring from the export in index.js
 const {
 	client,
 	createUser,
@@ -16,7 +15,7 @@ async function dropTables() {
 	try {
 		console.log("Starting to drop tables...");
 
-		// have to make sure to drop in correct order
+		// have to make sure to DROP IN CORRECT ORDER
 		await client.query(`
 		DROP TABLE IF EXISTS post_tags;
 		DROP TABLE IF EXISTS tags;

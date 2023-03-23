@@ -1,21 +1,6 @@
-//We are going to put our seed.js file on live reload so that we can see what's happening as we make changes. For now we will rely on logging to see what's happening under the hood as we go.
 require("dotenv").config("../.env");
-const { Client } = require("pg"); // imports the pg module
-//The pg module is a Node.js package for working with PostgreSQL databases. The Client object is a class provided by the pg module that you can use to create a client connection to a PostgreSQL database.
-
-//supply the db name and location of the database
-
-const client = new Client(process.env.DATABASE_URL || "postgres://postgres:1234@localhost:1234/juicebox-dev");
-
-//alternate method to setup client
-// METHOD 1: const client = new Client("postgres://postgres:1234@localhost:1234/juicebox-dev");
-// METHOD 2: const client = new Client({
-//     user: 'postgres',
-//     password: '1234',
-//     host: 'localhost',
-//     port: 5432,
-//     database: 'juicebox-dev'
-//   });
+const { Client } = require("pg");
+const client = new Client(process.env.DATABASE_URL);
 
 //USER Methods---------------------------------------------------
 async function createUser({ username, password, name, location }) {
@@ -134,7 +119,7 @@ async function getUserByUsername(username) {
 }
 
 //POST Methods-------------------------------------------------
-//added "tags" param to createPost
+//"tags" added to param createPost
 async function createPost({
 	authorId,
 	title,
@@ -161,9 +146,6 @@ async function createPost({
 	}
 }
 
-//Need to separate updating the post and the tags by creating more queries
-//Tag list might have some new tags, but it also might be missing some of the tags that
-//used to be part of the post.
 async function updatePost(postId, fields = {}) {
 	// read off the tags & remove that field
 	const { tags } = fields; // might be undefined
@@ -217,8 +199,6 @@ async function updatePost(postId, fields = {}) {
 	}
 }
 
-//We also want the associated information (tags and author) on each post.
-//Same method using in getPostsByUser
 async function getAllPosts() {
 	try {
 		const { rows: postIds } = await client.query(`
@@ -234,9 +214,6 @@ async function getAllPosts() {
 	}
 }
 
-//When we get the posts for a specific user, we will want to include the author and tags for each post.
-//If we modify the original query just to return the post id, we can iterate over each post calling our
-//updated getPostById, which has all the information we want in it.
 async function getPostsByUser(userId) {
 	try {
 		const { rows: postIds } = await client.query(`
@@ -310,11 +287,6 @@ async function getAllTags() {
 	}
 }
 
-//This function will usually follow createTags, since we will only create tags while we create posts,
-//and will need to create the elements in the join table after creating the tags.
-
-//These will be useful when we modify getPosts to include the tags, as well as when get create getPostsWithTag in a bit.
-//Here the tagList needs to be the ones returned from createTags, since we need the id, not the name.
 async function createPostTag(postId, tagId) {
 	try {
 		await client.query(
@@ -330,8 +302,6 @@ async function createPostTag(postId, tagId) {
 	}
 }
 
-//We can now use this multiple times in addTagsToPost. The function createPostTag is async, so it returns a promise.
-//That means if we make an array of non-await calls, we can use them with Promise.all, and then await that:
 async function addTagsToPost(postId, tagList) {
 	try {
 		const createPostTagPromises = tagList.map((tag) => createPostTag(postId, tag.id));
@@ -344,11 +314,6 @@ async function addTagsToPost(postId, tagList) {
 	}
 }
 
-//We will want the post, and its tags, we can do that with two queries. First we need to get the post itself,
-//then get its tags using a JOIN statement. We should also grab the author info using a simple query.
-
-//Last we should add the tags and author to the post before returning it, as well as remove the authorId,
-//since it is encapsulated in the author property.
 async function getPostById(postId) {
 	try {
 		const {
@@ -422,7 +387,6 @@ async function getPostsByTagName(tagName) {
 	}
 }
 
-// and export them
 module.exports = {
 	client,
 	createUser,

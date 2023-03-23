@@ -1,4 +1,4 @@
-//refer to users.js for reference setup to apiRouter
+//Endpoint--api/posts
 const express = require("express");
 const postsRouter = express.Router();
 const { requireUser } = require("./utils");
@@ -10,15 +10,10 @@ postsRouter.use((req, res, next) => {
 	next();
 });
 
-//creating a post---------------------------------------------
+//creating post-------------------------------------------------------------
 postsRouter.post("/", requireUser, async (req, res, next) => {
-	// res.send({ message: 'under construction' });
 	const { title, content, tags = "" } = req.body;
 
-	//refer to notes for tagArr
-	// tags.trim().split(/\s+/) is pretty neat. First the call to trim() removes any spaces in the front or back,
-	// and then split will turn the string into an array, splitting over any number of spaces. If the front-end sends
-	// us " #happy #bloated #full", then tagArr will be equal to ["#happy", "#boated", "#full"].
 	const tagArr = tags.trim().split(/\s+/);
 	const postData = {};
 
@@ -44,21 +39,19 @@ postsRouter.post("/", requireUser, async (req, res, next) => {
 	}
 });
 
-//getallposts-------------------------------------------------
+//getallposts--------------------------------------------------------------
 postsRouter.get("/", async (req, res, next) => {
 	try {
 		const allPosts = await getAllPosts();
 
-		//refer to notes for alternate way to writing filter with multiple if statements with the same return value;
 		const posts = allPosts.filter((post) => {
 			// keep a post if it is either active, or if it belongs to the current user
-			// a filter function should return something truthy if we want to keep the object, or something falsy if we don't.
+
 			if (post.active) {
 				return true;
 			}
 
-			// the post is not active, but it belogs to the current user
-			// So we have to do the req.user && .... trick, because if req.user isn't defined, we can't call .id on it.
+			// the post is not active, but it belongs to the current user
 			if (req.user && post.author.id === req.user.id) {
 				return true;
 			}
@@ -112,8 +105,6 @@ postsRouter.patch("/:postId", requireUser, async (req, res, next) => {
 });
 
 //deactivate posts----------------------------------------------
-// Because we've set up an active column in our post table, and (on creation) set it to true by default,
-// we can simply update a post to have active: false (not changing anything else) to delete it.
 postsRouter.delete("/:postId", requireUser, async (req, res, next) => {
 	try {
 		const post = await getPostById(req.params.postId);
@@ -142,9 +133,3 @@ postsRouter.delete("/:postId", requireUser, async (req, res, next) => {
 });
 
 module.exports = postsRouter;
-
-// When we call 'createPost', it is expecting it to be called with an object, with keys authorId, title, content,
-// and tags. It is also expecting tags to be an array.
-// This is the contract between the server and the database, as dictated by the code we wrote for the database.
-// However, we might want a simpler contract between our front-end and our API. There's no reason for it to be
-// the same. We can improve the front-end coding experience by taking a bit of a hit in our server-side code.

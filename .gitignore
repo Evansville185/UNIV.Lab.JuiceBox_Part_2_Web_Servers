@@ -1,3 +1,5 @@
 node_modules
 .env
-notes.js
+db notes.js
+api notes.js
+root index.js

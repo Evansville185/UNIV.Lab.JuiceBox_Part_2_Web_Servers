@@ -1,27 +1,16 @@
-//The express object is useful for more than creating a server. Here we use the Router function to create a new router,
-//and then export it from the script.
+//Endpoint--api/users
 const express = require("express");
-//creates a new router instance by calling express.Router() and is assigned to the
-// usersRouter constant.
 const usersRouter = express.Router();
 const jwt = require("jsonwebtoken");
-//destructure function from db/index.js
-//**in order to use function, need reference connection to 'client' in root index.js**
 const { getAllUsers, getUserByUsername, createUser } = require("../db");
 
-//middleware function logs a message to the console when a request is made to /users and sends a JSON
-//response containing a message property with the value 'hello from /usesrs!'.
 usersRouter.use((req, res, next) => {
 	console.log("A request is being made to /users");
 
-	// res.send({ message: 'hello from /users!' });
 	next();
 });
 
-
-// That middleware will fire whenever a GET request is made to /api/users
-// It will send back a simple object, with an empty array.
-//when a request comes in, we first ask the database for the data we want, then send it back to the user.
+//getallusers-----------------------------------------------------------
 usersRouter.get("/", async (req, res) => {
 	const users = await getAllUsers();
 
@@ -73,7 +62,7 @@ usersRouter.post("/login", async (req, res, next) => {
 usersRouter.post("/register", async (req, res, next) => {
 	const { username, password, name, location } = req.body;
 
-	//practicing validations for body---------
+	//practicing validations for body-------------
 	if (!username) {
 		next({
 			name: "MissingUsernameError",
@@ -100,7 +89,7 @@ usersRouter.post("/register", async (req, res, next) => {
 			message: "Location not filled out",
 		});
 	} else {
-		//practicing validatios for body---------
+		//practicing validatios for body-----------
 
 		try {
 			const _user = await getUserByUsername(username);
@@ -140,11 +129,4 @@ usersRouter.post("/register", async (req, res, next) => {
 	}
 });
 
-//exports usersRouter instance, so that it can be used by other modules.
 module.exports = usersRouter;
-
-//-----------------------------------------------------------------------------
-// Any time a request is made to a path starting with /api the apiRouter will be held responsible for making decisions, calling middleware, etc.
-// apiRouter will match paths now with the /api portion removed
-// This means that if we hit /api/users, apiRouter will try to match /users (which it can), and it will then pass on the responsibility to the usersRouter
-// Finally usersRouter will try to match (now with /api/users removed from the original matching path), and fire any middleware.

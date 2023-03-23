@@ -1,3 +1,4 @@
+//Endpoint--api/tags
 const express = require("express");
 const tagsRouter = express.Router();
 const { getAllTags, getPostsByTagName } = require("../db");
