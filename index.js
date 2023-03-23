@@ -67,10 +67,8 @@ server.use("/api", apiRouter);
 // The verb PATCH tells a server that we wish to update some data. It's not magic, we have to write the handler for it, but it's an agreed upon standard.
 // The second is that :postId. Express uses strings like that to transform whatever is in that position to a variable we can get off the request object:
 // This sets up a route we can hit: /background/:color, and whatever we put in the second spot will be set on req.params.color.
-server.get("/background/:color", (req, res, next) => {
-	res.send(`
-		<body style="background: ${req.params.color};">
-			<h1>Hello World</h1>
-		</body>
-	`);
+server.get("/", async (req, res) => {
+	res.send({
+		message: "You've reach an invalid endpoint",
+	});
 });
