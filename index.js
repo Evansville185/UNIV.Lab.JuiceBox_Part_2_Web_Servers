@@ -70,11 +70,11 @@ server.use("/api", apiRouter);
 server.get("/", async (req, res) => {
 	res.send(`
 		<body style="background: indigo">
-		<h1 style="color:purple; font-family:Sans Serif; font-size:30px"><u>Directory</u></h1>
+		<h1 style="color:purple; font-family:Sans Serif; font-size:30px"><u>JuiceBox Directory</u></h1>
 		<ul>
-		<li><a href="https://juicebox-part-2-servers.onrender.com/api/posts" style="color:yellow; font-family:Sans Serif; font-size:20px">Posts</a></li><br />
-		<li><a href="https://juicebox-part-2-servers.onrender.com/api/users" style="color:yellow; font-family:Sans Serif; font-size:20px">Users</a></li><br />
-		<li><a href="https://juicebox-part-2-servers.onrender.com/api/tags" style="color:yellow; font-family:Sans Serif; font-size:20px">Tags</a></li><br />
+			<li><a href="https://juicebox-part-2-servers.onrender.com/api/posts" style="color:yellow; font-family:Sans Serif; font-size:20px">Posts</a></li><br />
+			<li><a href="https://juicebox-part-2-servers.onrender.com/api/users" style="color:yellow; font-family:Sans Serif; font-size:20px">Users</a></li><br />
+			<li><a href="https://juicebox-part-2-servers.onrender.com/api/tags" style="color:yellow; font-family:Sans Serif; font-size:20px">Tags</a></li><br />
 		</ul>
 	  </body>
 	`);
