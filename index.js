@@ -68,7 +68,14 @@ server.use("/api", apiRouter);
 // The second is that :postId. Express uses strings like that to transform whatever is in that position to a variable we can get off the request object:
 // This sets up a route we can hit: /background/:color, and whatever we put in the second spot will be set on req.params.color.
 server.get("/", async (req, res) => {
-	res.send({
-		message: "You've reach an invalid endpoint",
-	});
+	res.send(`
+		<body style="background: indigo">
+		<h1 style="color:purple; font-family:Sans Serif; font-size:30px"><u>Directory</u></h1>
+		<ul>
+		<li><a href="https://juicebox-part-2-servers.onrender.com/api/posts" style="color:yellow; font-family:Sans Serif; font-size:20px">Posts</a></li><br />
+		<li><a href="https://juicebox-part-2-servers.onrender.com/api/users" style="color:yellow; font-family:Sans Serif; font-size:20px">Users</a></li><br />
+		<li><a href="https://juicebox-part-2-servers.onrender.com/api/tags" style="color:yellow; font-family:Sans Serif; font-size:20px">Tags</a></li><br />
+		</ul>
+	  </body>
+	`);
 });
