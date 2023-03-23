@@ -11,7 +11,6 @@ server.use(morgan("dev"));
 const { client } = require("./db");
 client.connect();
 
-
 // function will read incoming JSON from requests. The request's header has to be Content-Type: application/json,
 // but we get the benefit of being able to send objects easily to our server.
 server.use(express.json());
@@ -54,7 +53,7 @@ server.use((req, res, next) => {
 // 	console.log("2A get request was made to /api");
 // 	res.send({ message: "success" });
 //   });
-  
+
 // server.use('/api', (req, res, next) => {
 // 	console.log("2A request was made to /api");
 // 	next();
@@ -64,15 +63,14 @@ server.use((req, res, next) => {
 const apiRouter = require("./api");
 server.use("/api", apiRouter);
 
-// Updating a post is very similar to creating a post, with a few changes. The first change is how we form the route: PATCH /api/posts/:postId. 
+// Updating a post is very similar to creating a post, with a few changes. The first change is how we form the route: PATCH /api/posts/:postId.
 // The verb PATCH tells a server that we wish to update some data. It's not magic, we have to write the handler for it, but it's an agreed upon standard.
 // The second is that :postId. Express uses strings like that to transform whatever is in that position to a variable we can get off the request object:
 // This sets up a route we can hit: /background/:color, and whatever we put in the second spot will be set on req.params.color.
-server.get('/background/:color', (req, res, next) => {
+server.get("/background/:color", (req, res, next) => {
 	res.send(`
 		<body style="background: ${req.params.color};">
 			<h1>Hello World</h1>
 		</body>
 	`);
 });
-
